@@ -1,5 +1,6 @@
-import { cookies } from "next/headers";
+export const runtime = "nodejs";
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { verifySession, SESSION_COOKIE_NAME } from "@/lib/auth";
 import { canAccessMovie } from "@/lib/access";
@@ -12,7 +13,7 @@ export default async function WatchPage({ params }: { params: { slug: string } }
   if (!movie) notFound();
 
   const token = cookies().get(SESSION_COOKIE_NAME)?.value;
-  const session = token ? verifySession(token) : null;
+  const session = token ? await verifySession(token) : null;
 
   const user = session
     ? await db.user.findUnique({

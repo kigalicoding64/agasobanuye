@@ -7,7 +7,7 @@ import { Eye, DollarSign, Users, Film, UploadCloud } from "lucide-react";
 
 export default async function AdminPage() {
   const token = cookies().get(SESSION_COOKIE_NAME)?.value;
-  const session = token ? verifySession(token) : null;
+  const session = token ? await verifySession(token) : null;
 
   if (!session || session.role !== "ADMIN") {
     return (
@@ -53,3 +53,19 @@ export default async function AdminPage() {
               <th className="py-2 px-2">Rating</th>
             </tr>
           </thead>
+          <tbody>
+            {movies.map((m) => (
+              <tr key={m.id} className="border-b border-border">
+                <td className="py-2 px-2 font-semibold">{m.title}</td>
+                <td className="py-2 px-2 text-muted">{m.genre}</td>
+                <td className="py-2 px-2">{m.isPpv ? `PPV - ${m.priceRwf} RWF` : m.isVip ? "VIP" : "Free"}</td>
+                <td className="py-2 px-2 font-mono">{m.views}</td>
+                <td className="py-2 px-2">{m.rating?.toFixed(1) || "N/A"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
