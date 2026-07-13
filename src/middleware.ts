@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
 const SESSION_COOKIE_NAME = "iwacu_session";
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const needsAdmin = pathname.startsWith("/admin") || pathname.startsWith("/api/admin");
 
@@ -17,8 +17,10 @@ export function middleware(req: NextRequest) {
   }
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET as string) as { role: string };
-    if (payload.role !== "ADMIN" && payload.role !== "CREATOR") {
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET as string);
+    const { payload } = await jwtVerify(token, secret);
+    const role = (payload as any).role as string | undefined;
+    if (role !== "ADMIN" && role !== "CREATOR") {
       return pathname.startsWith("/api")
         ? NextResponse.json({ error: "Forbidden" }, { status: 403 })
         : NextResponse.redirect(new URL("/", req.url));

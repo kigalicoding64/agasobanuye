@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   const passwordHash = await hashPassword(password);
   const user = await db.user.create({ data: { name, email, phone, passwordHash } });
 
-  const token = signSession({ userId: user.id, role: user.role });
+  const token = await signSession({ userId: user.id, role: user.role });
   const res = NextResponse.json({ id: user.id, name: user.name });
   res.cookies.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
