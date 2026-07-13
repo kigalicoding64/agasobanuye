@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -11,7 +12,7 @@ export default async function AdminPage() {
   if (!session || session.role !== "ADMIN") {
     return (
       <div className="px-4 md:px-10 py-20 text-center text-muted">
-        Admin access only.{" "}
+        Admin access only. {" "}
         <Link href="/login" className="text-gold">Log in</Link> with an admin account.
       </div>
     );
@@ -52,31 +53,3 @@ export default async function AdminPage() {
               <th className="py-2 px-2">Rating</th>
             </tr>
           </thead>
-          <tbody>
-            {movies.map((m) => (
-              <tr key={m.id} className="border-b border-border">
-                <td className="py-2 px-2 font-semibold">{m.title}</td>
-                <td className="py-2 px-2 text-muted">{m.genre}</td>
-                <td className="py-2 px-2">{m.isPpv ? `PPV - ${m.priceRwf} RWF` : m.isVip ? "VIP" : "Free"}</td>
-                <td className="py-2 px-2 font-mono">{m.views}</td>
-                <td className="py-2 px-2 font-mono">{m.rating.toFixed(1)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ label, value, icon: Icon }: { label: string; value: string; icon: any }) {
-  return (
-    <div className="bg-surface border border-border rounded-lg p-4 flex-1 min-w-[150px]">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-muted">{label}</span>
-        <Icon size={16} className="text-gold" />
-      </div>
-      <p className="font-mono text-xl font-semibold">{value}</p>
-    </div>
-  );
-}

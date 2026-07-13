@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { MetadataRoute } from "next";
 import { db } from "@/lib/db";
 

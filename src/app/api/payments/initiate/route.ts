@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
     // calls a separate /api/payments/paypal/capture route. Left as a stub here.
     return NextResponse.json({ error: "PayPal checkout is not wired up yet in this scaffold." }, { status: 501 });
   } catch (err: any) {
-    await db.payment.update({ where: { id: payment.id }, data: { status: "FAILED" } });
-    return NextResponse.json({ error: err.message || "Payment provider error." }, { status: 502 });
+    console.error(err);
+    return NextResponse.json({ error: "Payment initiation failed." }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+export const runtime = "nodejs";
 import { db } from "@/lib/db";
 import Hero from "@/components/Hero";
 import MovieRow from "@/components/MovieRow";
