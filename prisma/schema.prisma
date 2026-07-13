@@ -1,0 +1,152 @@
+// Prisma schema for Iwacu Movies
+// Run `npx prisma migrate dev --name init` after setting DATABASE_URL in .env
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  CREATOR
+  ADMIN
+}
+
+enum SubscriptionPlan {
+  FREE
+  VIP_MONTHLY
+  VIP_YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  MOMO
+  AIRTEL
+  CARD
+  PAYPAL
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum PaymentType {
+  SUBSCRIPTION
+  PPV
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String?   @unique
+  phone         String?   @unique
+  passwordHash  String
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+
+  subscription  Subscription?
+  payments      Payment[]
+  favorites     Favorite[]
+  watchHistory  WatchHistory[]
+  comments      Comment[]
+  uploadedMovies Movie[]  @relation("UploadedBy")
+}
+
+model Movie {
+  id              String   @id @default(cuid())
+  title           String
+  slug            String   @unique
+  description     String
+  posterUrl       String?
+  videoUrl        String?
+  trailerUrl      String?
+  category        String   // trending | new | original | action | drama | documentary | comedy
+  genre           String
+  language        String   @default("RW")
+  isVip           Boolean  @default(false)
+  isPpv           Boolean  @default(false)
+  priceRwf        Int?     // only set when isPpv = true
+  durationMinutes Int?
+  releaseYear     Int?
+  rating          Float    @default(0)
+  views           Int      @default(0)
+  published       Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  uploadedById    String?
+  uploadedBy      User?    @relation("UploadedBy", fields: [uploadedById], references: [id])
+
+  favorites       Favorite[]
+  watchHistory    WatchHistory[]
+  comments        Comment[]
+  payments        Payment[]
+}
+
+model Subscription {
+  id        String              @id @default(cuid())
+  userId    String              @unique
+  user      User                @relation(fields: [userId], references: [id])
+  plan      SubscriptionPlan    @default(FREE)
+  status    SubscriptionStatus  @default(EXPIRED)
+  startedAt DateTime            @default(now())
+  expiresAt DateTime?
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  movieId     String?
+  movie       Movie?        @relation(fields: [movieId], references: [id])
+  amountRwf   Int
+  method      PaymentMethod
+  status      PaymentStatus @default(PENDING)
+  type        PaymentType
+  providerRef String?       // Flutterwave tx_ref / transaction id
+  createdAt   DateTime      @default(now())
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  movieId   String
+  movie     Movie    @relation(fields: [movieId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, movieId])
+}
+
+model WatchHistory {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  movieId         String
+  movie           Movie    @relation(fields: [movieId], references: [id])
+  progressSeconds Int      @default(0)
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, movieId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  movieId   String
+  movie     Movie    @relation(fields: [movieId], references: [id])
+  text      String
+  rating    Int
+  createdAt DateTime @default(now())
+}
